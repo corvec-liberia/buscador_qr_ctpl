@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORVEC | Consulta de código QR</title>
+  <style>
+    :root {
+      --bg:#f6f3ec;
+      --card:#ffffff;
+      --navy:#294b8a;
+      --green:#3b8450;
+      --gold:#c69822;
+      --text:#23314a;
+      --muted:#667387;
+      --border:#dde4ef;
+      --soft:#eef3fb;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg,#f7f4ed,#eef3f7);
+      color:var(--text);
+    }
+    .wrap {
+      max-width:980px;
+      margin:0 auto;
+      padding:18px;
+    }
+    .hero {
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 10px 24px rgba(36,49,74,.08);
+    }
+    .hero h1 {
+      margin:0;
+      text-align:center;
+      color:#6a4311;
+      font-family:Georgia, 'Times New Roman', serif;
+      font-size:clamp(30px, 4vw, 44px);
+    }
+    .hero .sub {
+      margin-top:8px;
+      text-align:center;
+      color:var(--navy);
+      font-family:Georgia, 'Times New Roman', serif;
+      font-size:clamp(20px, 2.6vw, 30px);
+    }
+    .hero .date {
+      margin-top:8px;
+      text-align:center;
+      color:var(--green);
+      font-size:clamp(18px, 2vw, 24px);
+    }
+    .panel {
+      margin-top:18px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:0 10px 24px rgba(36,49,74,.06);
+    }
+    .controls {
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    .field-label {
+      font-size:14px;
+      font-weight:bold;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    select {
+      width:100%;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid #cfd8e6;
+      font-size:16px;
+      background:#fff;
+      color:var(--text);
+    }
+    select:disabled {
+      background:#f2f5fa;
+      color:#8a97aa;
+    }
+    .hint {
+      margin-top:12px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+    .empty {
+      margin-top:14px;
+      padding:14px;
+      border-radius:14px;
+      background:#fff7e7;
+      color:#7a5b0c;
+      display:none;
+    }
+    .empty.show { display:block; }
+    .result {
+      margin-top:18px;
+      display:none;
+      gap:18px;
+      align-items:start;
+    }
+    .result.show {
+      display:grid;
+      grid-template-columns:1fr;
+    }
+    .meta {
+      background:#f9fbfe;
+      border:1px solid #d8e3f0;
+      border-radius:18px;
+      padding:16px;
+    }
+    .meta h2 {
+      margin:0 0 12px;
+      font-size:clamp(24px, 3vw, 32px);
+      color:var(--navy);
+      line-height:1.15;
+    }
+    .row { margin-bottom:12px; }
+    .label {
+      display:block;
+      font-size:12px;
+      font-weight:bold;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:4px;
+    }
+    .value {
+      font-size:18px;
+      line-height:1.35;
+    }
+    .school {
+      font-weight:bold;
+      font-size:22px;
+      color:var(--navy);
+    }
+    .card-preview {
+      width:100%;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:12px;
+      text-align:center;
+    }
+    .card-preview img {
+      width:100%;
+      max-width:520px;
+      border-radius:18px;
+      box-shadow:0 12px 30px rgba(36,49,74,.12);
+    }
+    .actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    .btn {
+      display:inline-block;
+      padding:12px 16px;
+      border-radius:12px;
+      background:var(--navy);
+      color:#fff;
+      text-decoration:none;
+      font-weight:bold;
+    }
+    .btn.alt {
+      background:var(--green);
+    }
+    @media (min-width:900px) {
+      .result.show {
+        grid-template-columns:360px 1fr;
+      }
+      .controls {
+        grid-template-columns:1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Primera Asamblea CORVEC</h1>
+      <div class="sub">Náhuatl - Chorotega</div>
+      <div class="date">Sede Liberia · 15 de abril del 2026</div>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <div>
+          <div class="field-label">Centro educativo</div>
+          <select id="centerSelect">
+            <option value="">Seleccione un centro educativo</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">Nombre</div>
+          <select id="nameSelect" disabled>
+            <option value="">Primero seleccione el centro educativo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hint">
+        Seleccione primero el centro educativo. Luego el sistema le mostrará únicamente los nombres de ese centro para que la persona abra su tarjeta QR desde el celular.
+      </div>
+
+      <div id="empty" class="empty">No hay registros para ese centro educativo.</div>
+
+      <div id="result" class="result">
+        <div class="meta">
+          <h2 id="personName">—</h2>
+          <div class="row">
+            <span class="label">Centro educativo</span>
+            <span class="value school" id="personSchool">—</span>
+          </div>
+          <div class="row">
+            <span class="label">Puesto</span>
+            <span class="value" id="personRole">—</span>
+          </div>
+          <div class="row">
+            <span class="label">Código</span>
+            <span class="value" id="personCode">—</span>
+          </div>
+          <div class="actions">
+            <a id="openImage" class="btn" href="#" target="_blank" rel="noopener">Abrir imagen</a>
+            <a id="downloadImage" class="btn alt" href="#" download>Descargar imagen</a>
+          </div>
+        </div>
+
+        <div class="card-preview">
+          <img id="cardImage" alt="Código QR" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="attendees.js"></script>
+  <script>
+    const centerSelect = document.getElementById('centerSelect');
+    const nameSelect = document.getElementById('nameSelect');
+    const result = document.getElementById('result');
+    const empty = document.getElementById('empty');
+    const personName = document.getElementById('personName');
+    const personSchool = document.getElementById('personSchool');
+    const personRole = document.getElementById('personRole');
+    const personCode = document.getElementById('personCode');
+    const cardImage = document.getElementById('cardImage');
+    const openImage = document.getElementById('openImage');
+    const downloadImage = document.getElementById('downloadImage');
+
+    const attendees = Array.isArray(ATTENDEES) ? ATTENDEES.slice() : [];
+
+    const normalize = (value) => String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+
+    const sortByText = (a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' });
+
+    const centers = [...new Set(attendees.map(a => String(a.centro_educativo || '').trim()).filter(Boolean))].sort(sortByText);
+
+    centers.forEach(center => {
+      const opt = document.createElement('option');
+      opt.value = center;
+      opt.textContent = center;
+      centerSelect.appendChild(opt);
+    });
+
+    centerSelect.addEventListener('change', () => {
+      const selectedCenter = centerSelect.value;
+      resetPerson();
+      nameSelect.innerHTML = '';
+
+      if (!selectedCenter) {
+        nameSelect.disabled = true;
+        addPlaceholder(nameSelect, 'Primero seleccione el centro educativo');
+        empty.classList.remove('show');
+        return;
+      }
+
+      const filtered = attendees
+        .filter(item => normalize(item.centro_educativo) === normalize(selectedCenter))
+        .sort((a, b) => sortByText(String(a.nombre || ''), String(b.nombre || '')));
+
+      if (!filtered.length) {
+        nameSelect.disabled = true;
+        addPlaceholder(nameSelect, 'No hay nombres disponibles');
+        empty.classList.add('show');
+        return;
+      }
+
+      empty.classList.remove('show');
+      nameSelect.disabled = false;
+      addPlaceholder(nameSelect, 'Seleccione su nombre');
+
+      filtered.forEach(person => {
+        const opt = document.createElement('option');
+        opt.value = person.codigo_qr;
+        opt.textContent = person.nombre;
+        nameSelect.appendChild(opt);
+      });
+    });
+
+    nameSelect.addEventListener('change', () => {
+      const code = nameSelect.value;
+      if (!code) {
+        resetPerson();
+        return;
+      }
+
+      const person = attendees.find(item => String(item.codigo_qr) === String(code));
+      if (!person) {
+        resetPerson();
+        return;
+      }
+
+      const imagePath = 'cards/' + person.archivo;
+      personName.textContent = person.nombre || '—';
+      personSchool.textContent = person.centro_educativo || '—';
+      personRole.textContent = person.puesto || '—';
+      personCode.textContent = person.codigo_qr || '—';
+      cardImage.src = imagePath;
+      cardImage.alt = 'Código QR de ' + (person.nombre || 'participante');
+      openImage.href = imagePath;
+      downloadImage.href = imagePath;
+      downloadImage.download = person.archivo || 'codigo-qr.png';
+      result.classList.add('show');
+    });
+
+    function addPlaceholder(select, text) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = text;
+      select.appendChild(opt);
+      select.value = '';
+    }
+
+    function resetPerson() {
+      result.classList.remove('show');
+      personName.textContent = '—';
+      personSchool.textContent = '—';
+      personRole.textContent = '—';
+      personCode.textContent = '—';
+      cardImage.removeAttribute('src');
+      cardImage.alt = 'Código QR';
+      openImage.href = '#';
+      downloadImage.href = '#';
+    }
+  </script>
+</body>
+</html>
